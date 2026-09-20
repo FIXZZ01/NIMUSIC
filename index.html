@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>NIMUSIC V5 - PLAY MUSIC MU</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@700&display=swap');
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+/* SISTEM TEMA */
+:root[data-theme="light"] {
+  --bg-color: #d1d8e0; --box-bg: #ffffff; --border-color: #000000;
+  --text-main: #000000; --text-invert: #ffffff;
+  --primary: #ff3f34; --secondary: #ffa801; --tertiary: #ffd32a;
+  --quaternary: #0be881; --quinary: #0fbcf9; --senary: #808e9b;
+}
+:root[data-theme="dark"] {
+  --bg-color: #1e272e; --box-bg: #2f3640; --border-color: #f5f6fa;
+  --text-main: #f5f6fa; --text-invert: #000000;
+  --primary: #ff5e57; --secondary: #ffc048; --tertiary: #ffdd59;
+  --quaternary: #05c46b; --quinary: #4bcffa; --senary: #485460;
+}
+:root[data-theme="industrial"] {
+  --bg-color: #a4b0be; --box-bg: #dfe4ea; --border-color: #2f3542;
+  --text-main: #2f3542; --text-invert: #ffffff;
+  --primary: #ff4757; --secondary: #eccc68; --tertiary: #7bed9f;
+  --quaternary: #70a1ff; --quinary: #57606f; --senary: #ced6e0;
+}
+
+body {
+  background-color: var(--bg-color);
+  background-image: radial-gradient(var(--border-color) 2px, transparent 2px);
+  background-size: 40px 40px;
+  color: var(--text-main);
+  font-family: 'Space Grotesk', sans-serif;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* DASHBOARD LAYOUT (GRID 3 KOLOM) */
+.dashboard {
+  width: 100%;
+  max-width: 1400px;
+  display: grid;
+  grid-template-columns: 280px 1fr 300px;
+  gap: 25px;
+}
+
+/* KOMPONEN DASAR BRUTALISM */
+.box {
+  background-color: var(--box-bg);
+  border: 4px solid var(--border-color);
+  box-shadow: 8px 8px 0px var(--border-color);
+  border-radius: 0px; 
+}
+.box-header {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 16px;
+  text-transform: uppercase;
+  padding: 10px 15px;
+  border-bottom: 4px solid var(--border-color);
+  color: var(--text-main);
+}
+.box-content { padding: 15px; }
+
+/* PANEL KIRI: MIXER & FX */
+.left-panel { display: flex; flex-direction: column; gap: 25px; }
+
+.slider-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.slider-group label {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+}
+input[type="range"] {
+  -webkit-appearance: none; width: 100%; height: 16px;
+  background: var(--box-bg); border: 3px solid var(--border-color);
+  box-shadow: 4px 4px 0px var(--border-color); outline: none; cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 24px; height: 24px;
+  background: var(--primary); border: 4px solid var(--border-color); cursor: pointer;
+}
+
+/* PANEL TENGAH: ENGINE UTAMA */
+.center-panel { display: flex; flex-direction: column; gap: 25px; }
+
+.top-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  background-color: var(--secondary);
+}
+.app-title { font-family: 'Archivo Black', sans-serif; font-size: 32px; letter-spacing: -2px; }
+.track-marquee {
+  flex: 1; margin: 0 20px;
+  background: var(--box-bg); border: 3px solid var(--border-color);
+  padding: 5px 15px; overflow: hidden; white-space: nowrap; font-size: 20px;
+}
+#track-name { display: inline-block; font-weight: 700; }
+
+.visualizer-container { width: 100%; height: 450px; position: relative; overflow: hidden; }
+canvas { display: block; width: 100%; height: 100%; }
+
+.controls-bar { background-color: var(--quinary); display: flex; flex-direction: column; gap: 15px;}
+.time-row { display: flex; align-items: center; gap: 15px; }
+.time-badge {
+  font-family: 'Archivo Black', sans-serif; font-size: 14px;
+  background: var(--box-bg); border: 3px solid var(--border-color); padding: 4px 10px;
+}
+.btn-row { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+
+.btn {
+  background-color: var(--box-bg); color: var(--text-main);
+  border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color);
+  padding: 10px 15px; font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+  cursor: pointer; text-transform: uppercase; transition: transform 0.1s;
+}
+.btn:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--border-color); }
+.btn-primary { background-color: var(--primary); color: #fff; border-color: #000; }
+
+/* PANEL KANAN: DATA & PLAYLIST */
+.right-panel { display: flex; flex-direction: column; gap: 25px; }
+
+.mini-screen { height: 120px; background-color: var(--box-bg); border-bottom: 4px solid var(--border-color); position: relative; }
+.mini-canvas { width: 100%; height: 100%; display: block; }
+
+.playlist-container { flex: 1; display: flex; flex-direction: column; max-height: 400px; }
+.playlist-items {
+  flex: 1; overflow-y: auto; padding: 10px;
+  display: flex; flex-direction: column; gap: 10px;
+  border-top: 4px solid var(--border-color);
+  border-bottom: 4px solid var(--border-color);
+}
+/* Scrollbar Brutalism */
+.playlist-items::-webkit-scrollbar { width: 15px; }
+.playlist-items::-webkit-scrollbar-track { background: var(--box-bg); border-left: 3px solid var(--border-color); }
+.playlist-items::-webkit-scrollbar-thumb { background: var(--primary); border: 3px solid var(--border-color); }
+
+.playlist-item {
+  padding: 10px; border: 3px solid var(--border-color); background: var(--box-bg);
+  cursor: pointer; font-weight: 700; font-size: 12px; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: 0.1s;
+}
+.playlist-item:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0px var(--border-color); }
+.playlist-item.active { background: var(--quaternary); color: #000; border-color: #000;}
+
+.upload-zone {
+  background-color: var(--tertiary); padding: 15px; text-align: center;
+  font-family: 'Archivo Black', sans-serif; cursor: pointer; transition: 0.1s;
+}
+.upload-zone:active { background-color: var(--primary); color: #fff; }
+#file-upload { display: none; }
+.drag-over { background-color: var(--primary) !important; color: white; }
+
+@media(max-width: 1200px){
+  .dashboard { grid-template-columns: 1fr; }
+  .left-panel { flex-direction: row; flex-wrap: wrap; }
+  .left-panel .box { flex: 1 1 300px; }
+  .visualizer-container { height: 350px; }
+}
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+  
+  <!-- PANEL KIRI (MIXER) -->
+  <aside class="left-panel">
+    <div class="box">
+      <div class="box-header" style="background-color: var(--tertiary);">DJ KONTROL</div>
+      <div class="box-content">
+        <div class="slider-group">
+          <label>VOLUME <span id="val-vol">100%</span></label>
+          <input type="range" id="sl-vol" min="0" max="1" step="0.05" value="1">
+        </div>
+        <div class="slider-group">
+          <label>TEMPO / SPEED <span id="val-speed">1.0x</span></label>
+          <input type="range" id="sl-speed" min="0.5" max="2" step="0.1" value="1">
+        </div>
+        <div class="slider-group">
+          <label>PANNING (L/R) <span id="val-pan">C</span></label>
+          <input type="range" id="sl-pan" min="-1" max="1" step="0.1" value="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-header" style="background-color: var(--quaternary);">3-BAND EQ</div>
+      <div class="box-content">
+        <div class="slider-group">
+          <label>LOW (BASS) <span id="val-bass">0dB</span></label>
+          <input type="range" id="eq-bass" min="-15" max="15" step="1" value="0">
+        </div>
+        <div class="slider-group">
+          <label>MID (VOCAL) <span id="val-mid">0dB</span></label>
+          <input type="range" id="eq-mid" min="-15" max="15" step="1" value="0">
+        </div>
+        <div class="slider-group">
+          <label>HIGH (TREBLE) <span id="val-treble">0dB</span></label>
+          <input type="range" id="eq-treble" min="-15" max="15" step="1" value="0">
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- PANEL TENGAH (ENGINE UTAMA) -->
+  <main class="center-panel">
+    <div class="box top-bar box-content">
+      <div class="app-title">NIMUSIC V5</div>
+      <div class="track-marquee">
+        <div id="track-name">SISTEM SIAP - MASUKKAN AUDIO</div>
+      </div>
+    </div>
+
+    <div class="box visualizer-container" id="vis-box">
+      <canvas id="canvas-main"></canvas>
+    </div>
+
+    <div class="box controls-bar box-content">
+      <div class="time-row">
+        <span class="time-badge" id="time-curr">0:00</span>
+        <input type="range" id="sl-seek" value="0" min="0" max="100" step="0.1">
+        <span class="time-badge" id="time-dur">0:00</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-prev">⏮</button>
+        <button class="btn btn-primary" id="btn-play" style="width: 80px; font-size:20px;">▶</button>
+        <button class="btn btn-primary" id="btn-next">⏭</button>
+        <button class="btn" id="btn-mode">MODE: BALOK</button>
+        <button class="btn" id="btn-color">WARNA: SOLID</button>
+        <button class="btn" id="btn-theme">TEMA: LIGHT</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- PANEL KANAN (DATA & PLAYLIST) -->
+  <aside class="right-panel">
+    <div class="box">
+      <div class="box-header" style="background-color: var(--quinary);">OSCILLOSCOPE</div>
+      <div class="mini-screen">
+        <canvas id="canvas-wave" class="mini-canvas"></canvas>
+      </div>
+    </div>
+
+    <div class="box playlist-container">
+      <div class="box-header" style="background-color: var(--senary); color: #fff;">PLAYLIST (QUEUE)</div>
+      
+      <label class="upload-zone" id="drop-zone">
+        + DRAG/KLIK UNTUK TAMBAH LAGU
+        <input type="file" id="file-upload" accept="audio/*" multiple>
+      </label>
+
+      <div class="playlist-items" id="playlist-box">
+        <!-- Item Playlist Muncul Di Sini -->
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+// --- ELEMEN DOM ---
+const audio = document.getElementById('audio');
+const canvasMain = document.getElementById('canvas-main');
+const ctxMain = canvasMain.getContext('2d');
+const canvasWave = document.getElementById('canvas-wave');
+const ctxWave = canvasWave.getContext('2d');
+
+const trackName = document.getElementById('track-name');
+const btnPlay = document.getElementById('btn-play');
+const slSeek = document.getElementById('sl-seek');
+const timeCurr = document.getElementById('time-curr');
+const timeDur = document.getElementById('time-dur');
+
+const playlistBox = document.getElementById('playlist-box');
+const dropZone = document.getElementById('drop-zone');
+const fileUpload = document.getElementById('file-upload');
+
+// --- AUDIO & ANALYSER ---
+let audioCtx, source, panner, filterBass, filterMid, filterTreble;
+let analyserFreq, analyserWave;
+let dataFreq, dataWave;
+let isDraggingSeek = false;
+let animOffset = 0;
+let peaks = []; 
+
+// --- PLAYLIST STATE ---
+let playlist = []; // Array of File objects
+let currentTrackIdx = -1;
+
+// --- SETTINGS STATE ---
+let styleMode = 0; // 0=Balok, 1=Kotak, 2=Radial/Lingkaran, 3=PeakDrop
+let colorMode = 0; // 0=Solid, 1=Rainbow, 2=Rainbow Jalan, 3=Monokrom
+let themeIdx = 0; const themes = ['light', 'dark', 'industrial'];
+
+// RE-SIZE CANVAS
+function resizeCanvas() {
+  canvasMain.width = canvasMain.parentElement.clientWidth;
+  canvasMain.height = canvasMain.parentElement.clientHeight;
+  canvasWave.width = canvasWave.parentElement.clientWidth;
+  canvasWave.height = canvasWave.parentElement.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+// INIT WEB AUDIO API
+function initAudio() {
+  if(audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  
+  analyserFreq = audioCtx.createAnalyser();
+  analyserFreq.fftSize = 128;
+  analyserFreq.smoothingTimeConstant = 0.8;
+  
+  analyserWave = audioCtx.createAnalyser();
+  analyserWave.fftSize = 512; // Lebih rapat untuk gelombang
+
+  panner = audioCtx.createStereoPanner();
+  
+  filterBass = audioCtx.createBiquadFilter(); filterBass.type = "lowshelf"; filterBass.frequency.value = 250;
+  filterMid = audioCtx.createBiquadFilter(); filterMid.type = "peaking"; filterMid.frequency.value = 1500; filterMid.Q.value = 1;
+  filterTreble = audioCtx.createBiquadFilter(); filterTreble.type = "highshelf"; filterTreble.frequency.value = 4000;
+
+  source = audioCtx.createMediaElementSource(audio);
+  
+  // Rantai: Source -> Bass -> Mid -> Treble -> Panner -> (Freq & Wave) -> Destination
+  source.connect(filterBass);
+  filterBass.connect(filterMid);
+  filterMid.connect(filterTreble);
+  filterTreble.connect(panner);
+  
+  panner.connect(analyserFreq);
+  panner.connect(analyserWave);
+  
+  analyserFreq.connect(audioCtx.destination);
+  // Analyser Wave tidak diconnect ke destination agar tidak double sound
+
+  dataFreq = new Uint8Array(analyserFreq.frequencyBinCount);
+  dataWave = new Uint8Array(analyserWave.frequencyBinCount);
+}
+
+// --- SISTEM PLAYLIST ---
+function addFilesToPlaylist(files) {
+  for(let i=0; i<files.length; i++) {
+    if(files[i].type.startsWith('audio/')) playlist.push(files[i]);
+  }
+  renderPlaylistUI();
+  if(currentTrackIdx === -1 && playlist.length > 0) playTrack(0);
+}
+
+function renderPlaylistUI() {
+  playlistBox.innerHTML = '';
+  playlist.forEach((file, index) => {
+    let div = document.createElement('div');
+    div.className = 'playlist-item';
+    if(index === currentTrackIdx) div.classList.add('active');
+    div.textContent = `${index + 1}. ${file.name.replace(/\.[^/.]+$/, "")}`;
+    div.onclick = () => playTrack(index);
+    playlistBox.appendChild(div);
+  });
+}
+
+function playTrack(index) {
+  if(index < 0 || index >= playlist.length) return;
+  initAudio();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+
+  currentTrackIdx = index;
+  const file = playlist[index];
+  
+  audio.src = URL.createObjectURL(file);
+  trackName.textContent = file.name.replace(/\.[^/.]+$/, "");
+  peaks = []; // Reset visualizer peaks
+  
+  // Animasi Marquee jika panjang
+  if(trackName.textContent.length > 30) trackName.style.animation = "marquee 8s linear infinite";
+  else trackName.style.animation = "none";
+
+  renderPlaylistUI();
+  audio.play().then(() => { btnPlay.textContent = "||"; });
+}
+
+// DRAG & DROP & INPUT FILE
+fileUpload.addEventListener('change', (e) => addFilesToPlaylist(e.target.files));
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  addFilesToPlaylist(e.dataTransfer.files);
+});
+
+// KONTROL TRANSPORT (Prev, Play, Next)
+btnPlay.addEventListener('click', () => {
+  if(playlist.length === 0) return fileUpload.click();
+  initAudio(); if(audioCtx.state === 'suspended') audioCtx.resume();
+  if(audio.paused) { audio.play(); btnPlay.textContent = "||"; } 
+  else { audio.pause(); btnPlay.textContent = "▶"; }
+});
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  if(currentTrackIdx < playlist.length - 1) playTrack(currentTrackIdx + 1);
+});
+document.getElementById('btn-prev').addEventListener('click', () => {
+  if(audio.currentTime > 3) audio.currentTime = 0; // Ulang lagu jika sudah lewat 3 detik
+  else if(currentTrackIdx > 0) playTrack(currentTrackIdx - 1);
+});
+
+// AUTO NEXT SAAT LAGU HABIS
+audio.addEventListener('ended', () => {
+  if(currentTrackIdx < playlist.length - 1) playTrack(currentTrackIdx + 1);
+  else { btnPlay.textContent = "▶"; audio.currentTime = 0; }
+});
+
+// --- DJ KONTROL (MIXER) ---
+document.getElementById('sl-vol').addEventListener('input', (e) => {
+  audio.volume = e.target.value;
+  document.getElementById('val-vol').textContent = Math.round(e.target.value * 100) + '%';
+});
+
+document.getElementById('sl-speed').addEventListener('input', (e) => {
+  audio.playbackRate = e.target.value;
+  document.getElementById('val-speed').textContent = Number(e.target.value).toFixed(1) + 'x';
+});
+
+document.getElementById('sl-pan').addEventListener('input', (e) => {
+  if(panner) panner.pan.value = e.target.value;
+  let txt = "C";
+  if(e.target.value < 0) txt = "L " + Math.abs(Math.round(e.target.value*100)) + "%";
+  if(e.target.value > 0) txt = "R " + Math.abs(Math.round(e.target.value*100)) + "%";
+  document.getElementById('val-pan').textContent = txt;
+});
+
+// --- EQ CONTROLS ---
+document.getElementById('eq-bass').addEventListener('input', (e) => {
+  if(filterBass) filterBass.gain.value = e.target.value;
+  document.getElementById('val-bass').textContent = e.target.value > 0 ? '+'+e.target.value+'dB' : e.target.value+'dB';
+});
+document.getElementById('eq-mid').addEventListener('input', (e) => {
+  if(filterMid) filterMid.gain.value = e.target.value;
+  document.getElementById('val-mid').textContent = e.target.value > 0 ? '+'+e.target.value+'dB' : e.target.value+'dB';
+});
+document.getElementById('eq-treble').addEventListener('input', (e) => {
+  if(filterTreble) filterTreble.gain.value = e.target.value;
+  document.getElementById('val-treble').textContent = e.target.value > 0 ? '+'+e.target.value+'dB' : e.target.value+'dB';
+});
+
+// --- PROGRESS BAR ---
+audio.addEventListener('loadedmetadata', () => {
+  slSeek.max = audio.duration;
+  timeDur.textContent = formatTime(audio.duration);
+});
+audio.addEventListener('timeupdate', () => {
+  if(!isDraggingSeek) {
+    slSeek.value = audio.currentTime;
+    timeCurr.textContent = formatTime(audio.currentTime);
+  }
+});
+slSeek.addEventListener('input', () => { isDraggingSeek = true; timeCurr.textContent = formatTime(slSeek.value); });
+slSeek.addEventListener('change', () => { audio.currentTime = slSeek.value; isDraggingSeek = false; });
+
+function formatTime(sec) {
+  if(isNaN(sec)) return "0:00";
+  const m = Math.floor(sec / 60); const s = Math.floor(sec % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+// --- TOMBOL SAKLAR UI ---
+document.getElementById('btn-mode').addEventListener('click', (e) => {
+  styleMode = (styleMode + 1) % 4;
+  const labels = ["MODE: BALOK", "MODE: KOTAK", "MODE: RADIAL", "MODE: PEAK DROP"];
+  e.target.textContent = labels[styleMode];
+});
+
+document.getElementById('btn-color').addEventListener('click', (e) => {
+  colorMode = (colorMode + 1) % 4;
+  const labels = ["WARNA: SOLID", "WARNA: RAINBOW", "WARNA: JALAN", "WARNA: MONOKROM"];
+  e.target.textContent = labels[colorMode];
+});
+
+document.getElementById('btn-theme').addEventListener('click', (e) => {
+  themeIdx = (themeIdx + 1) % themes.length;
+  document.documentElement.setAttribute('data-theme', themes[themeIdx]);
+  e.target.textContent = "TEMA: " + themes[themeIdx].toUpperCase();
+});
+
+// --- RENDER VISUALIZER UTAMA & MINI WAVEFORM ---
+function draw() {
+  requestAnimationFrame(draw);
+  
+  // Dapatkan warna dari CSS Theme Variable
+  const style = getComputedStyle(document.body);
+  const boxBg = style.getPropertyValue('--box-bg').trim();
+  const borderCol = style.getPropertyValue('--border-color').trim();
+  const primaryCol = style.getPropertyValue('--primary').trim();
+  
+  const w = canvasMain.width; const h = canvasMain.height;
+  ctxMain.fillStyle = boxBg || '#fff'; ctxMain.fillRect(0, 0, w, h);
+
+  if(!analyserFreq) return;
+
+  // 1. GAMBAR MINI OSCILLOSCOPE (KANVAS KANAN)
+  const ww = canvasWave.width; const wh = canvasWave.height;
+  ctxWave.fillStyle = boxBg; ctxWave.fillRect(0, 0, ww, wh);
+  
+  analyserWave.getByteTimeDomainData(dataWave);
+  ctxWave.beginPath();
+  ctxWave.lineWidth = 4;
+  ctxWave.strokeStyle = primaryCol;
+  let slice = ww / dataWave.length;
+  for(let i = 0; i < dataWave.length; i++) {
+    let v = dataWave[i] / 128.0;
+    let y = v * (wh / 2);
+    let x = i * slice;
+    if(i === 0) ctxWave.moveTo(x, y); else ctxWave.lineTo(x, y);
+  }
+  ctxWave.stroke();
+
+  // 2. GAMBAR FREQUENCY VISUALIZER (KANVAS UTAMA)
+  analyserFreq.getByteFrequencyData(dataFreq);
+  
+  // Anti Rata Kiri
+  const activeBars = Math.floor(dataFreq.length * 0.7); 
+  const barWidth = w / activeBars;
+  animOffset += 2; 
+
+  // LOGIKA RADIAL / LINGKARAN BRUTALISM
+  if (styleMode === 2) {
+    const centerX = w / 2;
+    const centerY = h / 2;
+    const radius = Math.min(w, h) * 0.15;
+    
+    for(let i = 0; i < activeBars; i++) {
+      let val = Math.pow(dataFreq[i] / 255, 1.2);
+      const barH = val * (Math.min(w, h) * 0.35);
+      const angle = (i / activeBars) * Math.PI * 2;
+      
+      // Hitung warna
+      if (colorMode === 0) ctxMain.fillStyle = primaryCol; 
+      else if (colorMode === 1) ctxMain.fillStyle = `hsl(${(i / activeBars) * 360}, 100%, 55%)`; 
+      else if (colorMode === 2) ctxMain.fillStyle = `hsl(${((i / activeBars) * 360 + animOffset) % 360}, 100%, 55%)`; 
+      else ctxMain.fillStyle = borderCol; 
+      
+      ctxMain.save();
+      ctxMain.translate(centerX, centerY);
+      ctxMain.rotate(angle);
+      
+      ctxMain.lineWidth = 3;
+      ctxMain.strokeStyle = borderCol;
+      
+      // Gambar Balok menonjol keluar
+      ctxMain.fillRect(0, radius, barWidth * 0.8, barH);
+      if(barH > 0 && colorMode !== 3) ctxMain.strokeRect(0, radius, barWidth * 0.8, barH);
+      
+      ctxMain.restore();
+    }
+    return; // Berhenti agar tidak menggambar bar biasa
+  }
+
+  // LOGIKA BENTUK BALOK, KOTAK, & PEAK DROP
+  for(let i = 0; i < activeBars; i++) {
+    let val = Math.pow(dataFreq[i] / 255, 1.2); 
+    const barHeight = val * (h - 20); 
+    const x = i * barWidth;
+    const finalBarWidth = barWidth * 0.75; 
+
+    // WARNA
+    if (colorMode === 0) ctxMain.fillStyle = primaryCol; 
+    else if (colorMode === 1) ctxMain.fillStyle = `hsl(${(i / activeBars) * 360}, 100%, 55%)`; 
+    else if (colorMode === 2) ctxMain.fillStyle = `hsl(${((i / activeBars) * 360 + animOffset) % 360}, 100%, 55%)`; 
+    else ctxMain.fillStyle = borderCol; 
+
+    ctxMain.lineWidth = 3; ctxMain.strokeStyle = borderCol;
+
+    if(styleMode === 3) {
+      if(!peaks[i]) peaks[i] = 0;
+      if(barHeight > peaks[i]) peaks[i] = barHeight;
+      else peaks[i] = Math.max(0, peaks[i] - 2); 
+    }
+
+    if (styleMode === 0 || styleMode === 3) {
+      // BALOK
+      const y = h - barHeight;
+      ctxMain.fillRect(x + (barWidth*0.125), y, finalBarWidth, barHeight);
+      if(barHeight > 0 && colorMode !== 3) ctxMain.strokeRect(x + (barWidth*0.125), y, finalBarWidth, barHeight);
+      
+      // PEAK DROP
+      if (styleMode === 3 && peaks[i] > 0) {
+        ctxMain.fillStyle = borderCol; 
+        ctxMain.fillRect(x + (barWidth*0.125), h - peaks[i] - 12, finalBarWidth, 8);
+      }
+    } 
+    else if (styleMode === 1) {
+      // KOTAK PIXEL / BATA
+      const boxSize = 16; const gap = 4;
+      const totalBoxes = Math.floor(barHeight / (boxSize + gap));
+      for(let b = 0; b < totalBoxes; b++) {
+        const y = h - (b * (boxSize + gap)) - boxSize;
+        ctxMain.fillRect(x + (barWidth*0.125), y, finalBarWidth, boxSize);
+        if (colorMode !== 3) ctxMain.strokeRect(x + (barWidth*0.125), y, finalBarWidth, boxSize);
+      }
+    }
+  }
+}
+draw();
+</script>
+
+</body>
+</html>
